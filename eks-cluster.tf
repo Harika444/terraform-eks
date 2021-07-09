@@ -9,7 +9,6 @@ module "eks" {
   }
 
   vpc_id = module.vpc.vpc_id
-
   workers_group_defaults = {
     root_volume_type = "gp2"
     root_volume_size     = 8
@@ -25,9 +24,20 @@ module "eks" {
     },
   ]
 }
-
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_id
+}
+
+
+data "aws_ami" "eks_worker" {
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-1.18-v*"]
+  }
+
+  most_recent = true
+
+  owners = ["amazon"]
 }
 
 data "aws_eks_cluster_auth" "cluster" {
