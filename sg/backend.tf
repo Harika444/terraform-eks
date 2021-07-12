@@ -3,7 +3,7 @@ terraform {
     organization = "Harika"
 
     workspaces {
-      name = "my-VPC"
+      name = "my-SG"
     }
   }
 }

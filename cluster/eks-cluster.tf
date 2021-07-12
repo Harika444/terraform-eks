@@ -1,14 +1,25 @@
+data "terraform_remote_state" "cluster" {
+  backend = "remote"
+
+  config = {
+    organization = "Harika"
+    workspaces = {
+      name = "my-SG"
+    }
+  }
+}
+
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = local.cluster_name
+  cluster_name    = data.terraform_remote_state.cluster.outputs.cluster_name
   cluster_version = "1.20"
-  subnets         = module.vpc.private_subnets
+  subnets         = data.terraform_remote_state.cluster.outputs.private_subnets
 
   tags = {
     Environment = "learning"
   }
 
-  vpc_id = module.vpc.vpc_id
+  vpc_id = data.terraform_remote_state.cluster.outputs.vpc_id
   workers_group_defaults = {
     root_volume_type = "gp2"
     root_volume_size     = 8
@@ -20,7 +31,7 @@ module "eks" {
       instance_type                 = "t2.small"
       additional_userdata           = "echo foo bar"
       asg_desired_capacity          = 1
-      additional_security_group_ids = [aws_security_group.worker_group.id]
+      additional_security_group_ids = data.terraform_remote_state.cluster.outputs.worker_security_group_id
     },
   ]
 }
